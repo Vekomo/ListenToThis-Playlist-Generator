@@ -1,5 +1,4 @@
 import praw
-import sys
 import configparser
 import spotipy
 import spotipy.util as util
@@ -45,23 +44,27 @@ def spotifyLogin():
     else:
         print("Can't get token, login fail")
         
+
+
+        
 def redditLogin():
     #for now just testing if credentials are working
     #Eclipse cant print out some characters that come up when pulling
     #things from reddit, run in console
     print("Pulling info from reddit...")
-    for submission in reddit.subreddit('listentothis').top(limit=10):
-        print(submission.title)
-    
-    
-    
-        
+    for submission in reddit.subreddit('listentothis').top(time_filter = 'day', limit=10):
+        #submission.title returns however many you set the limit to,
+        #So I need to find a way to seperate them and store them individually into an array to 
+        #Later sort and extract the artist and song name and then store THOSE into some arrays/variables
+        #Also python's arrays are called lists, whats up with that?
+        submissionTitle = submission.title
     
 
 def main():
     
     spotifyLogin()
     redditLogin()
+
         
     
 
