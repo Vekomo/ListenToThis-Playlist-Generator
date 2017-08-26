@@ -4,6 +4,7 @@ import spotipy
 import spotipy.util as util
 
 
+
 #Read from the config file for our credentials and keys
 
 config = configparser.ConfigParser()
@@ -44,29 +45,105 @@ def spotifyLogin():
     else:
         print("Can't get token, login fail")
         
+    return sp
 
+submissionTitles = []
+tracks = []
+sorted_tracks = []
 
-        
-def redditLogin():
-    #for now just testing if credentials are working
+ 
+def get_song_names():
+
     #Eclipse cant print out some characters that come up when pulling
     #things from reddit, run in console
-    print("Pulling info from reddit...")
+    print("Pulling songs from reddit...")
     for submission in reddit.subreddit('listentothis').top(time_filter = 'day', limit=10):
-        #submission.title returns however many you set the limit to,
-        #So I need to find a way to seperate them and store them individually into an array to 
+
         #Later sort and extract the artist and song name and then store THOSE into some arrays/variables
         #Also python's arrays are called lists, whats up with that?
-        submissionTitle = submission.title
+        
+        #Appending each title to submissionTitles
+        #split splits the string at the character set
+        if "-" in submission.title:
+            splitName = submission.title 
+            splitName = splitName.split('[')[0]
+            splitName = splitName.split('(')[0]
+            submissionTitles.append(splitName)
+            #submissionTitles.append(submission.title) 
+    #Printing out to make sure we got the right output
+    #print(submissionTitles)
     
+def get_track_id(track_dict):
+ 
+    track_dict = track_dict['tracks']
+    track_dict = track_dict['items']
+    if (len(track_dict) == 0):
+        print("Could not find song on Spotify")
+    else:
+        track_dict = track_dict[0]
+        tracks.append(track_dict['id'])
+        
+    
+def get_user(sp):
+    user_id = sp.current_user()
+    user_id = user_id['id']
+    return user_id
+
+def get_playlist_id(sp):
+
+    numPlaylist = 0
+    i = 0
+    playlist_id = sp.current_user_playlists()
+    playlist_list = playlist_id['items']
+    numPlaylist = len(playlist_list)
+
+    # prints out playlist names and their index
+    while(i < numPlaylist):   
+        playlist_dict = playlist_list[i]
+        print(playlist_dict['name'] + " " , i)
+        i = i + 1
+    print("Which playlist would you like to add to?")
+    playlist_index = input()
+    playlist_index = int(playlist_index)
+    playlist_id = playlist_list[playlist_index]
+    playlist_id = playlist_id['id']  
+    
+    
+    
+    return playlist_id
+        
+def searchAdd(sp):
+    item = 0
+    while(item < len(submissionTitles)):
+        searchTerm = submissionTitles[item]
+        print("Searching spotify for " + searchTerm)
+        track_dict = sp.search(searchTerm, limit = 1, type = "track")
+        track_id = get_track_id(track_dict)
+        tracks.append(track_id)
+        item = item + 1
+    print(tracks)
+    
+def trackAdd(sp, playlist_id):
+    sorted_tracks = filter(None, tracks)
+    print(sorted_tracks)
+    username = get_user(sp)
+    sp.user_playlist_add_tracks(username, playlist_id, sorted_tracks)
+    print ("Success!")
+        
 
 def main():
     
-    spotifyLogin()
-    redditLogin()
-
-        
+    #Logs into spotify
+    sp = spotifyLogin()
+    #Prints out your public playlists and asks user which one you would like to add to
+    playlist_id = get_playlist_id(sp)
+    #Gets song names and populates submissionTitles list with searchable items
+    get_song_names()
+    #Searches for and gets track_id then populates track list with ids to add to playlist
+    searchAdd(sp)
+    trackAdd(sp, playlist_id)
     
+
 
 if __name__ == "__main__":
         main()
