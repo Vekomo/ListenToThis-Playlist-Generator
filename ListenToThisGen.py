@@ -54,14 +54,10 @@ sorted_tracks = []
  
 def get_song_names():
 
-    #Eclipse cant print out some characters that come up when pulling
-    #things from reddit, run in console
+
     print("Pulling songs from reddit...")
     for submission in reddit.subreddit('listentothis').top(time_filter = 'day', limit=10):
-
-        #Later sort and extract the artist and song name and then store THOSE into some arrays/variables
-        #Also python's arrays are called lists, whats up with that?
-        
+ 
         #Appending each title to submissionTitles
         #split splits the string at the character set
         if "-" in submission.title:
@@ -78,7 +74,7 @@ def get_track_id(track_dict):
     track_dict = track_dict['tracks']
     track_dict = track_dict['items']
     if (len(track_dict) == 0):
-        print("Could not find song on Spotify")
+        print("Could not find song on Spotify, dawg")
     else:
         track_dict = track_dict[0]
         tracks.append(track_dict['id'])
